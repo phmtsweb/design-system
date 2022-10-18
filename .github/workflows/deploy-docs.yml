@@ -5,8 +5,11 @@ on:
     branches:
       - master
 
+concurrency: ${{ github.workflor }}-${{ github.ref }}
+
 jobs:
-  build-and-deploy:
+  release:
+    name: Release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,9 +24,21 @@ jobs:
 
       - run: npm ci
 
+      - name: Publish to NPM
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          publish: npm run Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          TURBO_TOKEN: gzFbmgPx03HGwSiJi7TTNVuf
+          TURBO_TEAM: phmts
+
+
       - run: npm run build
         env:
-          TURBO_TOKEN: gzFbmgPx03HGwSiJi7TTNVuf
+          TURBO_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           TURBO_TEAM: phmts
 
       - name: Deploy storybook
